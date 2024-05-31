@@ -1,26 +1,107 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div class="app">
+
+    <section class="greeting">
+      <h2 class="title">
+        What's up, <input type="text" placeholder="Name here" v-model="name">
+      </h2>
+    </section>
+
+    <section class="create-todo">
+      <h3>CREATE A TODO</h3>
+
+      <form @submit.prevent='addTodo'>
+
+        <h4>What's on your todo list?</h4>
+        <input type="text" placeholder="make a video" v-model="input_content"/>
+        <h4>Pick a category</h4>
+
+        <div class="options">
+
+          <label>
+            <input type="radio" name="category" value="business" v-model="input_category"/>
+            <span class="bubble business"></span>
+            <div >Business</div>
+          </label>
+
+          <label>
+            <input type="radio" name="category" value="personal" v-model="input_category"/>
+            <span class="bubble personal"></span>
+            <div >Personal</div>
+          </label>
+   
+        </div>
+
+        <input type="submit" value="Add todo">
+      </form>
+
+    </section>
+    <div class="showlist">
+      <section class="todo-list">
+      <h3>TODO LIST</h3>
+      <div class="list">
+        <div v-for="(todo,index) in todos" :key="index" :class="`todo-item ${todo.done && 'done'}`">
+          <label>
+            <input type="checkbox" v-model="todo.done">
+            <span :class="`bubble ${todo.category}`"></span>
+          </label>
+
+          <div class="todo-content">
+            <input type="text" v-model="todo.content">
+          </div>
+          <div class="actions">
+            <button class="delete" @click="removeTodo(todo)">Delete</button>
+          </div>
+        </div>
+      </div>
+    </section>
+    </div>
+  </div>
 </template>
 
-<script>
-import HelloWorld from './components/HelloWorld.vue'
 
-export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  }
+
+<script setup>
+import { onMounted, ref, watch } from 'vue';
+
+const todos = ref([]);
+const name = ref("");
+const input_content = ref("");
+const input_category = ref(null);
+
+
+const addTodo = () =>{
+  if(input_content.value.trim() === '' || input_category.value === null ){
+    return;
+  }else[
+    todos.value.push({
+      content: input_content.value,
+      category: input_category.value,
+      done: false,
+      createdAt:new Date() .getDate()
+    })
+  ]
+  input_category.value =''
+  input_category.value = null
 }
+
+const removeTodo =(todo)=>{
+  todos.value = todos.value.filter((t)=> t !== todo)
+}
+watch(todos,(newVal)=>{
+  localStorage.setItem('todos',JSON.stringify(newVal))
+},{ deep:true})
+
+watch(name, (newVal) => {
+  localStorage.setItem('name', newVal);
+});
+
+onMounted(()=>{
+  name.value = localStorage.getItem('name') || ''
+  todos.value = JSON.parse(localStorage.getItem('todos')) || []
+})
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+
 </style>
